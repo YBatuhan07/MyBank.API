@@ -2,9 +2,9 @@
 using MyBank.Repository.Enums;
 using MyBank.Repository.Transactions;
 
-namespace MyBank.Repository.Accounts;
+namespace MyBank.Services.Accounts;
 
-public class Account
+public record AccountDto
 {
     public int Id { get; set; }
     public string AccountNumber { get; set; } = null!;
@@ -14,3 +14,4 @@ public class Account
     public Customer Customer { get; set; } = null!;
     public ICollection<Transaction>? Transactions { get; set; }
 }
+

@@ -1,8 +1,7 @@
-
 using Microsoft.EntityFrameworkCore;
 using MyBank.Repository;
 using MyBank.Repository.Accounts;
-using MyBank.Services;
+using MyBank.Services.Accounts;
 
 namespace MyBank.App
 {
@@ -34,7 +33,6 @@ namespace MyBank.App
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

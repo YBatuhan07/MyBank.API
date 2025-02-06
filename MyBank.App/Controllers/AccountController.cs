@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using MyBank.Repository.Accounts;
-using MyBank.Services;
+using MyBank.Services.Accounts;
 
 namespace MyBank.App.Controllers
 {

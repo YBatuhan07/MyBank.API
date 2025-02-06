@@ -1,5 +1,4 @@
-﻿using MyBank.Repository.Customers;
-using MyBank.Repository.Enums;
+﻿using MyBank.Repository.Enums;
 
 namespace MyBank.Repository.Accounts;
 

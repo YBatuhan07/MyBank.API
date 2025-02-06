@@ -7,11 +7,13 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 {
     protected readonly MyBankDbContext _context;
     private readonly DbSet<T> _dbSet;
+
     public GenericRepository(MyBankDbContext context)
     {
         _context = context;
         _dbSet = _context.Set<T>();
     }
+
     public async Task AddAsync(T entity)
     {
         await _dbSet.AddAsync(entity);
