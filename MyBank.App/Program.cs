@@ -20,6 +20,7 @@ namespace MyBank.App
             builder.Services.AddDbContext<MyBankDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
             builder.Services.AddScoped<AccountService>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             var app = builder.Build();
 
