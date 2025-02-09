@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json.Serialization;
 
 namespace MyBank.Services;
 
@@ -6,9 +7,18 @@ public class ServiceResult<T>
 {
     public T? Data { get; set; }
     public List<string>? ErrorMessage { get; set; }
+
+    [JsonIgnore]
     public HttpStatusCode HttpStatusCode { get; set; }
+
+    [JsonIgnore]
     public bool IsSuccess => ErrorMessage is null || ErrorMessage.Count == 0;
+
+    [JsonIgnore]
     public bool IsFail => !IsSuccess;
+
+    [JsonIgnore]
+    public string? UrlAsCreated { get; set; }
 
     public static ServiceResult<T> Success(T data, HttpStatusCode httpStatusCode = HttpStatusCode.OK)
     {
@@ -16,6 +26,16 @@ public class ServiceResult<T>
         {
             Data = data,
             HttpStatusCode = httpStatusCode
+        };
+    }
+
+    public static ServiceResult<T> SuccessAsCreated(T data, string urlAsCreated)
+    {
+        return new ServiceResult<T>()
+        {
+            Data = data,
+            HttpStatusCode = HttpStatusCode.Created,
+            UrlAsCreated = urlAsCreated
         };
     }
 
@@ -37,6 +57,7 @@ public class ServiceResult<T>
         };
     }
 }
+
 public class ServiceResult
 {
     public List<string>? ErrorMessage { get; set; }
