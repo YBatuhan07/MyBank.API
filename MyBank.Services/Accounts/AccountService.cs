@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyBank.Repository;
 using MyBank.Repository.Accounts;
+using System.Net;
 
 namespace MyBank.Services.Accounts;
 
@@ -21,7 +22,15 @@ public class AccountService : IAccountService
         var accountDto = result.Select(x => new AccountDto(x.Id, x.AccountNumber, x.Balance, x.AccountType, x.CustomerId, x.Customer, x.Transactions)).ToList();
 
         return ServiceResult<List<AccountDto>>.Success(accountDto);
-    } 
+    }
+
+    public async Task<ServiceResult<List<AccountDto>>> GetPagedAllListAsync(int pageNumber, int pageSize)
+    {
+        var accounts = await _accountRepository.GetAll().Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        var accountAsDto = accounts.Select(x => new AccountDto(x.Id, x.AccountNumber, x.Balance, x.AccountType, x.CustomerId, x.Customer, x.Transactions)).ToList();
+        return ServiceResult<List<AccountDto>>.Success(accountAsDto);
+    }
+
     public async Task<ServiceResult<AccountDto>> GetByIdAsync(int id)
     {
         var result = await _accountRepository.GetByIdAsync(id);
@@ -29,8 +38,8 @@ public class AccountService : IAccountService
         {
             return ServiceResult<AccountDto>.Fail("Account not found");
         }
-        var accountAsDto = new AccountDto(result.Id,result.AccountNumber ,result.Balance, result.AccountType, result.CustomerId, result.Customer, result.Transactions);
-        
+        var accountAsDto = new AccountDto(result.Id, result.AccountNumber, result.Balance, result.AccountType, result.CustomerId, result.Customer, result.Transactions);
+
         return ServiceResult<AccountDto>.Success(accountAsDto);
     }
 
@@ -45,7 +54,7 @@ public class AccountService : IAccountService
         };
         await _accountRepository.AddAsync(account);
         await _unitOfWork.SaveChangesAsync();
-        return ServiceResult<CreateAccountResponse>.Success(new CreateAccountResponse(account.Id));
+        return ServiceResult<CreateAccountResponse>.SuccessAsCreated(new CreateAccountResponse(account.Id), $"api/accounts/{account.Id}");
     }
 
     public async Task<ServiceResult> UpdateAsync(int id, UpdateAccountRequest updateAccountRequest)
@@ -63,7 +72,20 @@ public class AccountService : IAccountService
 
         _accountRepository.Update(account);
         await _unitOfWork.SaveChangesAsync();
-        return ServiceResult.Success();
+        return ServiceResult.Success(HttpStatusCode.NoContent);
+    }
+
+    public async Task<ServiceResult> UpdateBalanceAsync(UpdateAccountBalanceRequest Request)
+    {
+        var account = await _accountRepository.GetByIdAsync(Request.AccountId);
+        if (account is null)
+            return ServiceResult.Fail("Account not found", HttpStatusCode.NotFound);
+
+        account.Balance = Request.Balance;
+        _accountRepository.Update(account);
+        await _unitOfWork.SaveChangesAsync();
+
+        return ServiceResult.Success(HttpStatusCode.NoContent);
     }
 
     public async Task<ServiceResult> DeleteAsync(int id)
@@ -77,6 +99,6 @@ public class AccountService : IAccountService
 
         _accountRepository.Delete(account);
         await _unitOfWork.SaveChangesAsync();
-        return ServiceResult.Success();
+        return ServiceResult.Success(HttpStatusCode.NoContent);
     }
 }

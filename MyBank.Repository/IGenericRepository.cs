@@ -4,7 +4,7 @@ namespace MyBank.Repository;
 
 public interface IGenericRepository<T>
 {
-    Task<T> GetByIdAsync(int id);
+    Task<T?> GetByIdAsync(int id);
 
     IQueryable<T> GetAll();
 

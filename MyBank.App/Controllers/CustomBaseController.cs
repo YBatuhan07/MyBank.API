@@ -12,7 +12,10 @@ public class CustomBaseController : ControllerBase
     public IActionResult CreateActionResult<T>(ServiceResult<T> serviceResult)
     {
         if (serviceResult.HttpStatusCode == HttpStatusCode.NoContent)
-            return new ObjectResult(null) { StatusCode = serviceResult.HttpStatusCode.GetHashCode() };
+            return NoContent();
+        
+        if(serviceResult.HttpStatusCode == HttpStatusCode.Created)
+            return Created(serviceResult.UrlAsCreated, serviceResult);
 
         return new ObjectResult(serviceResult) { StatusCode = serviceResult.HttpStatusCode.GetHashCode() };
     }
