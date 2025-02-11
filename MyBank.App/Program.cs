@@ -1,43 +1,68 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyBank.Repository;
 using MyBank.Repository.Accounts;
+using MyBank.Services;
 using MyBank.Services.Accounts;
+using MyBank.Services.Accounts.Create;
+using MyBank.Services.ExceptionHandler;
+using MyBank.Services.Mapping;
+using System.Reflection;
 
-namespace MyBank.App
+namespace MyBank.App;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+
+        // Add services to the container.
+
+        builder.Services.AddControllers(options =>
         {
-            var builder = WebApplication.CreateBuilder(args);
+            options.Filters.Add<FluentValidationFilter>();
+            options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+        });
 
-            // Add services to the container.
+        builder.Services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddDbContext<MyBankDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
-            builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-            builder.Services.AddScoped<AccountService>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddFluentValidationAutoValidation();
+        builder.Services.AddValidatorsFromAssembly(typeof(CreateAccountRequestValidator).Assembly);
 
-            var app = builder.Build();
+        builder.Services.AddExceptionHandler<CriticalExceptionHandler>();
+        builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
 
-            app.UseHttpsRedirection();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
-            app.UseAuthorization();
+        builder.Services.AddDbContext<MyBankDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+        builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+        builder.Services.AddScoped<AccountService>();
+        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
-            app.MapControllers();
+        var app = builder.Build();
 
-            app.Run();
+        app.UseExceptionHandler(x => { });
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        app.MapControllers();
+
+        app.Run();
     }
 }
