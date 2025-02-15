@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyBank.Repository;
 
@@ -11,9 +12,11 @@ using MyBank.Repository;
 namespace MyBank.Repository.Migrations
 {
     [DbContext(typeof(MyBankDbContext))]
-    partial class MyBankDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250215150211_AddAuditInterceptors")]
+    partial class AddAuditInterceptors
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

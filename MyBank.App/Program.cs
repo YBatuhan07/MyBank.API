@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MyBank.Repository;
 using MyBank.Repository.Accounts;
+using MyBank.Repository.Customers;
+using MyBank.Repository.Interceptors;
 using MyBank.Services;
 using MyBank.Services.Accounts;
 using MyBank.Services.Accounts.Create;
+using MyBank.Services.Customers;
 using MyBank.Services.ExceptionHandler;
 using MyBank.Services.Mapping;
-using System.Reflection;
 
 namespace MyBank.App;
 
@@ -35,16 +37,25 @@ public class Program
         builder.Services.AddExceptionHandler<CriticalExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
-
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        builder.Services.AddDbContext<MyBankDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+        builder.Services.AddDbContext<MyBankDbContext>(options =>
+        {
+            options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+            options.AddInterceptors(new AuditDbContextInterceptor());
+        });
+
         builder.Services.AddScoped<IAccountRepository, AccountRepository>();
         builder.Services.AddScoped<AccountService>();
+
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+        builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+        builder.Services.AddScoped<ICustomerService, CustomerService>();
 
         var app = builder.Build();
 
